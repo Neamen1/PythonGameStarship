@@ -1,0 +1,5 @@
+money:54
+damage_upgrade_level:1
+player_speed:1.0
+bullet_upgrade_level:1
+speed_of_bullet_upgrade_level:1
