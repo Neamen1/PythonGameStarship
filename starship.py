@@ -18,7 +18,7 @@ FLOOR_SIZE = 10         # bottom zone size
 DEFAULT_ENEMIES_NUMBER = 10
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
-IMAGES_DIR = os.path.join(PROJECT_DIR, 'images')  # где находятся картинки внутри проекта
+IMAGES_DIR = os.path.join(PROJECT_DIR, 'images')                # local path to images
 SCORES_DIR_NAME = os.path.join(PROJECT_DIR ,"topscores.txt")    # path to scores file
 MONEY_DIR_NAME = os.path.join(PROJECT_DIR, 'game_money.txt')    # path to data file
 
@@ -656,7 +656,7 @@ def do_game_win(game):      # when player passed a level
 
     BUTTONS["go_main_menu"].configure(command=save_and_go_main_menu)
     BUTTONS["quit"].configure(command=save_and_quit)
-    BUTTONS["continue"].configure(command=onclick)  # Можно менять обработчик нажатия по-необходимости
+    BUTTONS["continue"].configure(command=onclick)  # click handler can be changed if needed
 
 
 def reset_game(game):   # removing the keypress handlers
