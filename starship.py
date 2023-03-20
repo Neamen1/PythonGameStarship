@@ -42,7 +42,7 @@ BUTTONS = {}        # all buttons are stored in dictionary
 top10_scores=[]
 top10_scores_win=None
 def read_score():           # loading scores
-    if not os._exists(SCORES_DIR_NAME):
+    if not os.path.exists(SCORES_DIR_NAME):
         top_scores = open(SCORES_DIR_NAME,"w")
         top_scores.close()
     top_scores = open(SCORES_DIR_NAME,'r')
