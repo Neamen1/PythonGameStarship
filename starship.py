@@ -89,6 +89,7 @@ enemy_texture_LIGHT = tk.PhotoImage(file=os.path.join(IMAGES_DIR, ENEMY_IMAGE_LI
 enemy_texture_MEDIUM = tk.PhotoImage(file=os.path.join(IMAGES_DIR, ENEMY_IMAGE_MEDIUM))
 enemy_texture_HEAVY = tk.PhotoImage(file=os.path.join(IMAGES_DIR, ENEMY_IMAGE_HEAVY))
 enemy_texture_BOSS = tk.PhotoImage(file=os.path.join(IMAGES_DIR, ENEMY_IMAGE_BOSS))
+
 player1_img_file = os.path.join(IMAGES_DIR, PLAYER1_IMAGE)      # player image path
 player1_image = Image.open(player1_img_file).resize((PLAYER_WIDTH, PLAYER_HEIGHT))
 # Image.open(file) loads image and creates image object, which ahs resize method
@@ -99,20 +100,15 @@ player2_img_file = os.path.join(IMAGES_DIR, PLAYER2_IMAGE)
 player2_image = Image.open(player2_img_file).resize((PLAYER_WIDTH, PLAYER_HEIGHT))
 player2_texture = ImageTk.PhotoImage(image=player2_image)
 
-
 def main():
     CANVAS.delete(tk.ALL)
-    # Create all needed buttons on the start, then just draw/hide them when needed 
-    BUTTONS["run"] = tk.Button(ROOT, text="start", fg="white", command=rungame, name="button1", background="green")
-    BUTTONS["continue"] = tk.Button(ROOT, text="continue", fg="white", name="continueButton", background="#C88539")
-    BUTTONS["retry"] = tk.Button(ROOT, text="retry", command=rungame, fg="white", name="retryButton",background="#C88539")
-    BUTTONS["quit"] = tk.Button(ROOT, text="quit", fg="white", command=quit, name="quitButton", background="#C88539")
-    BUTTONS["go_main_menu"] = tk.Button(ROOT, text="Go to main menu", command=main, fg="white", name="go_main_menu",background="#C88539")
-    BUTTONS["upgrades_menu"] = tk.Button(ROOT, text="Upgrades", command=upgrades, fg="white", name="upgrades_menu",background="#C88539")
-    BUTTONS["damage_upgrade_level"] = tk.Button(ROOT, text=f"Damage upgrade level: {damage_upgrade_level} ", fg="white", name="damage_upgrade_level",background="#45AC4A")
-    BUTTONS["player_speed"] = tk.Button(ROOT, text=f"Player speed upgrade: {player_speed} ", fg="white", name="player_speed_upgrade", background="#45AC4A")
-    BUTTONS["bullet_quantity_upgrade_level"] = tk.Button(ROOT, text=f"Bullet quantity upgrade level: {bullet_quantity_upgrade_level} ", fg="white", name="bullet_quantity_upgrade_level",background="#45AC4A")
-    BUTTONS["speed_of_bullet_upgrade_level"] = tk.Button(ROOT, text=f"Speed of bullet upgrade: {speed_of_bullet_upgrade_level} ", fg="white", name="speed_of_bullet_upgrade_level",background="#45AC4A")
+    BUTTONS["retry"].place_forget()
+    BUTTONS["continue"].place_forget()
+    BUTTONS["damage_upgrade_level"].place_forget()
+    BUTTONS["player_speed"].place_forget()
+    BUTTONS["bullet_quantity_upgrade_level"].place_forget()
+    BUTTONS["speed_of_bullet_upgrade_level"].place_forget()
+    BUTTONS["go_main_menu"].place_forget()
     
     BUTTONS["quit"].place(x=FIELD_WIDTH - 180, y=FIELD_HEIGHT - 100, width=80, height=40)
     
@@ -133,9 +129,7 @@ def main():
     BUTTONS["upgrades_menu"].place(x=(FIELD_WIDTH - 80)//1.35, y=(FIELD_HEIGHT - 65) / 2, width=80, height=65)
 
     choose_difficulty.set(0)
-    BUTTONS["easyHardness"] = tk.Radiobutton(text="Easy", variable=choose_difficulty, value=0, bg="black", fg="white")
-    BUTTONS["midHardness"] = tk.Radiobutton(text="Medium", variable=choose_difficulty, value=7, bg="black", fg="white")
-    BUTTONS["highHardness"] = tk.Radiobutton(text="Hard", variable=choose_difficulty, value=14, bg="black", fg="white")
+    
 
     BUTTONS["easyHardness"].place(x=(FIELD_WIDTH - 100) / 2, y=(FIELD_HEIGHT - 100) / 2 + 160, height=20)
     BUTTONS["midHardness"].place(x=(FIELD_WIDTH - 100) / 2, y=(FIELD_HEIGHT - 100) / 2 + 180, height=20)
@@ -320,11 +314,9 @@ def rungame():      # main game start function
         "ammo": tk.IntVar(value=20 + choose_difficulty.get() * 2), # initial number of ammo, depends on the difficulty
         "bonuses":[],
         "dead_pieces":[]  # for effects after enemy killed
-}
+    }
     
     game["ammo"].trace_add('write', lambda *args: redraw_ammo(game))     
-    
-    
 
     runlevel(game)
 
@@ -341,47 +333,26 @@ def runlevel(game):         # level parameters
         CANVAS.delete(level_text)
     
     CANVAS.create_text(pos_x, pos_y, text=f'Level: {game["level"]}', fill="white")
-    # creating players
+    
+    
+    def do_game_over_on_button_press():
+        game["is_over"]=True
+        do_game_over(game)
+        
+    CANVAS.bind_all('<KeyPress-r>', lambda e: do_game_over_on_button_press())
 
-    player1 = create_player(player1_texture)
-    CANVAS.move(player1, 40, 0)
-    bul_color1 = "red"  # bullet color for player 1
-    
-    
-    CANVAS.bind_all('<KeyPress-Left>', lambda e: move_player(player1, -10))
-    CANVAS.bind_all('<KeyPress-Right>', lambda e: move_player(player1, 10))
-    CANVAS.bind_all('<KeyPress-Return>', lambda e: perform_shooting(player1, game, bul_color1))
-    game["players"].append(player1)
-    
-    player2 = create_player(player2_texture)
-    bul_color2 = "purple"  # bullet color for player 2
-    CANVAS.move(player2, -40, 0)
-    CANVAS.bind_all('<KeyPress-1>', lambda e: move_player(player2, -10))
-    CANVAS.bind_all('<KeyPress-2>', lambda e: move_player(player2, 10))
-    CANVAS.bind_all('<KeyPress-space>', lambda e: perform_shooting(player2, game, bul_color2))
-    game["players"].append(player2)
     game["start_time"] = time.time()
+    
     if game["level"]%3==0:      # every 3rd level is boss level
         global warning_text
         warning_text = CANVAS.create_text(FIELD_WIDTH/2, FIELD_HEIGHT/2, font=("ARIAL", 20, "bold"),text="Warning! Boss level!", fill="red")        
         CANVAS.after(int((1.5-(game["hardness"]*0.03))*1000) , lambda: CANVAS.delete(warning_text))     # after some time delete warning text
+    
     game["num_of_enemies"] = DEFAULT_ENEMIES_NUMBER + game["hardness"]
     game["bonuses"].append(Bonus())
     chanse = random.randint(1, 100)
     if chanse >= 0 and chanse <= 70:
-        CANVAS.after(3500, lambda : game["bonuses"].append(Bonus(color="pink", x2=10, y2=10)))
-    
-    def nextstep():  # game main loop
-        update_game(game)
-        is_won = not game["enemies"] and not game["dead_pieces"] and game["num_of_enemies"]<1
-        if not is_won and not game["is_over"]:
-            CANVAS.after(TICK, nextstep)  # invoking loop again every tick, between invoking buttons input can be read
-            
-        elif is_won:
-            do_game_win(game)
-        else:
-            do_game_over(game)
-
+        game["bonuses"].append(Bonus(color="pink", x2=10, y2=10))
 
     global coins                # (re)drawing money text
     pos_1 = FIELD_WIDTH / 1.5 
@@ -392,7 +363,68 @@ def runlevel(game):         # level parameters
     CANVAS.create_text(pos_1, pos_2, text=f'coins: {coins}', fill="white")
 
     redraw_score(game)
-    CANVAS.after(1, nextstep)
+
+    class Playfield:
+        def __init__(self):
+            self.pressed = {}
+            self._set_bindings()
+            self.tickCounter=0
+            # creating players
+            bul_color1 = "red"  # bullet color for player 1
+            self.player1 = Player(player1_texture, bul_color1)
+            self.player1.move(40)
+            game["players"].append(self.player1)
+
+            bul_color2 = "purple"  # bullet color for player 2
+            self.player2 = Player(player2_texture, bul_color2)
+            self.player2.move(-40)
+            game["players"].append(self.player2)
+            game["is_over"] = False
+            self.nextstep()
+
+        def nextstep(self):  # game main loop
+            update_game(game)
+
+            if self.tickCounter%6==5:
+                
+                if self.pressed["a"]: self.player2.move(-10)
+                elif self.pressed["d"]: self.player2.move(10)
+                
+                if self.pressed["j"]: self.player1.move(-10)
+                elif self.pressed["l"]: self.player1.move(10)
+
+                if self.tickCounter% 10 == 9:
+                    if self.pressed["w"]: self.player2.shoot(game)
+                    if self.pressed["i"]: self.player1.shoot(game)
+                    self.tickCounter=-1
+                
+            self.tickCounter+=1
+
+            is_won = not game["enemies"] and not game["dead_pieces"] and game["num_of_enemies"]<1
+            if game["is_over"]:
+                is_won = False
+            
+            if not is_won and not game["is_over"]:
+                CANVAS.after(TICK, self.nextstep)  # invoking loop again every tick, between invoking buttons input can be read
+            elif is_won:
+                do_game_win(game)
+            else:
+                do_game_over(game)
+
+        def _set_bindings(self):
+            for char in ["a","d","w", "j", "l", "i"]:
+                ROOT.bind("<KeyPress-%s>" % char, self._pressed)
+                ROOT.bind("<KeyRelease-%s>" % char, self._released)
+                self.pressed[char] = False
+
+        def _pressed(self, event):
+            self.pressed[event.char] = True
+
+        def _released(self, event):
+            self.pressed[event.char] = False
+    
+    p = Playfield()
+    p.nextstep()
 
 def update_game_score(game,killed_enemy_health):        # score per enemy changes on different difficulties
     if game["hardness"] < 7:
@@ -477,9 +509,6 @@ def update_game(game):
                 game["enemies"].remove(killed_enemy)
                 
                 
-                
-            
-        
         if killed_enemy or is_outside_borders(bullet) or destroy_bonus:
             bullet.clear()
             game["bullets"].remove(bullet)
@@ -572,7 +601,6 @@ class Dead_Piece:
 def do_game_over(game):
     reset_game(game)  # removing the keypress handlers
     global top10_scores
-    global top10_scores_win
     if not top10_scores:
         top_scores = open(SCORES_DIR_NAME,"w")
         top_scores.write(str(game["score"]) + "\n")
@@ -648,7 +676,7 @@ def do_game_win(game):      # when player passed a level
         top_scores.close()
         main()
     
-    def onclick():
+    def level_continue():
         game["level"] += 1
         BUTTONS["continue"].place_forget()
         BUTTONS["quit"].place_forget()
@@ -656,28 +684,24 @@ def do_game_win(game):      # when player passed a level
 
     BUTTONS["go_main_menu"].configure(command=save_and_go_main_menu)
     BUTTONS["quit"].configure(command=save_and_quit)
-    BUTTONS["continue"].configure(command=onclick)  # click handler can be changed if needed
+    BUTTONS["continue"].configure(command=level_continue)  # click handler can be changed if needed
 
 
-def reset_game(game):   # removing the keypress handlers
-    # returning to main menu
+def reset_game(game):
     CANVAS.delete(tk.ALL)
 
     game["enemies"].clear()
     game["bullets"].clear()
     game["players"].clear()
-    game["is_over"] = False
     game["dead_pieces"].clear()
     game["bonuses"].clear()
 
-    # unbinding keyPress handlers from deleted players
-    CANVAS.unbind_all('<KeyPress-Left>')
-    CANVAS.unbind_all('<KeyPress-Right>')
-    CANVAS.unbind_all('<KeyPress-Return>')
 
-    CANVAS.unbind_all('<KeyPress-1>')
-    CANVAS.unbind_all('<KeyPress-2>')
-    CANVAS.unbind_all('<KeyPress-space>')
+    # unbinding keyPress handlers from deleted players
+    for char in ["a","d","w", "j", "l", "i", "r"]:
+        ROOT.unbind_all("<KeyPress-%s>" % char)
+        ROOT.unbind_all("<KeyRelease-%s>" % char)
+
 
 
 def create_player(texture):
@@ -687,6 +711,41 @@ def create_player(texture):
         image=texture)
     return player_id
 
+class Player:
+    
+    def __init__(self, player_texture, bul_color, player_width = PLAYER_WIDTH, player_height=PLAYER_HEIGHT):
+        self.id = CANVAS.create_image(  # drawing image on coordinates
+        (FIELD_WIDTH - player_width) / 2,
+        FIELD_HEIGHT - player_height - FLOOR_SIZE,
+        image=player_texture)
+        self.bul_color = bul_color
+
+    def move(self, step):
+        step*=player_speed
+        player_pos = CANVAS.bbox(self.id)
+        if not (player_pos[0] + step < FIELD_WIDTH * 0.1 or player_pos[2]+step > FIELD_WIDTH * 0.9):
+            CANVAS.move(self.id, step, 0)
+
+    def shoot(self, game):
+        ammo = game["ammo"].get()
+        if ammo > 0:
+            player_pos = CANVAS.bbox(self.id)
+            player_x = (player_pos[0]+player_pos[2])//2
+            player_y = player_pos[1]
+            bullet_shift = 15
+            diagonal_shift_x = 2            # shift for additional bullets, which will go to the sides also, not just straight
+            for i in range(bullet_quantity_upgrade_level):      # spawn as many bullets as the upgrade level
+                shift_x=((0-bullet_quantity_upgrade_level /2)+i)*bullet_shift+bullet_shift/2
+                if bullet_quantity_upgrade_level==1:
+                    bullet = Bullet(player_x = player_x, player_y=player_y, bul_color = self.bul_color,diagonal_shift_x = 0)  
+                elif bullet_quantity_upgrade_level==2 and i==0:
+                    bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = self.bul_color,diagonal_shift_x = 0-diagonal_shift_x)
+                elif bullet_quantity_upgrade_level == 2 and i==1:
+                    bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = self.bul_color,diagonal_shift_x = diagonal_shift_x)
+                else:
+                    bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = self.bul_color,diagonal_shift_x = diagonal_shift_x*(i-1))   
+                game["bullets"].append(bullet)
+            game["ammo"].set(ammo-1)
 
 class Enemies:
     max_health = 6  # basic max_health of enemy
@@ -696,7 +755,7 @@ class Enemies:
         self.shiftx = shiftx
         self.shifty = shifty
         # position of enemy
-        x = random.randrange(FIELD_WIDTH * 0.2, FIELD_WIDTH * 0.8, 5)
+        x = random.randrange(int(FIELD_WIDTH * 0.2), int(FIELD_WIDTH * 0.8), 5)
         y = FIELD_HEIGHT * 0.1
         enemy = CANVAS.create_image(x, y, image=enemy_texture, tag="Enemies")
         self.canvid = enemy
@@ -743,15 +802,6 @@ class Enemies:
         CANVAS.delete(self.health_cid)
         CANVAS.delete(self.health_cid2)
 
-def move_player(player, step):
-    step*=player_speed
-    CANVAS.move(player, step, 0)
-    player_pos = CANVAS.bbox(player)
-    if player_pos[0] < FIELD_WIDTH * 0.1:
-        CANVAS.move(player, -step, 0)
-    elif player_pos[2] >= FIELD_WIDTH * 0.9:
-        CANVAS.move(player, -step, 0)
-
 class Bullet:
     def __init__(self, player_x, player_y, bul_color, diagonal_shift_x=0):
         self.diag_shift_x = diagonal_shift_x
@@ -772,37 +822,12 @@ class Bullet:
     def clear(self):
         CANVAS.delete(self.canvid)
        
-
-def perform_shooting(player, game, bul_color):
-    # function for creating a bullet
-    # the movement of the bullet and the collision check is handled by the update_game function
-    ammo = game["ammo"].get()
-    if ammo > 0:
-        player_pos = CANVAS.bbox(player)
-        player_x = (player_pos[0]+player_pos[2])//2
-        player_y = player_pos[1]
-        bullet_shift = 15
-        diagonal_shift_x = 2            # shift for additional bullets, which will go to the sides also, not just straight
-        for i in range(bullet_quantity_upgrade_level):      # spawn as many bullets as the upgrade level
-            shift_x=((0-bullet_quantity_upgrade_level /2)+i)*bullet_shift+bullet_shift/2
-            if bullet_quantity_upgrade_level==1:
-                bullet = Bullet(player_x = player_x, player_y=player_y, bul_color = bul_color,diagonal_shift_x = 0)  
-            elif bullet_quantity_upgrade_level==2 and i==0:
-                bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = bul_color,diagonal_shift_x = 0-diagonal_shift_x)
-            elif bullet_quantity_upgrade_level == 2 and i==1:
-                bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = bul_color,diagonal_shift_x = diagonal_shift_x)
-            else:
-                bullet = Bullet(player_x = player_x + shift_x, player_y=player_y, bul_color = bul_color,diagonal_shift_x = diagonal_shift_x*(i-1))   
-            game["bullets"].append(bullet)
-        game["ammo"].set(ammo - 1)
-
-
 class Bonus:
     def __init__(self, color="yellow", shiftx=0, shifty=0.5, x2=0, y2=0):
         self.shiftx = shiftx
         self.shifty = shifty
-        x = random.randrange(FIELD_WIDTH * 0.2, FIELD_WIDTH * 0.8, 5)
-        y = random.randrange(FIELD_HEIGHT * 0.1, FIELD_HEIGHT * 0.4, 5)
+        x = random.randrange(int(FIELD_WIDTH * 0.2), int(FIELD_WIDTH * 0.8), 5)
+        y = random.randrange(int(FIELD_HEIGHT * 0.1), int(FIELD_HEIGHT * 0.4), 5)
         bonus_id = CANVAS.create_rectangle(x, y, x+30+x2, y+30+y2, fill=color, tag="Bonuses")
         self.color = color
         self.canvid = bonus_id
@@ -847,4 +872,19 @@ def is_outside_borders(item):
 
 
 if __name__ == '__main__':
+    # Create all needed buttons on the start, then just draw/hide them when needed 
+    BUTTONS["run"] = tk.Button(ROOT, text="start", fg="white", command=rungame, name="button1", background="green")
+    BUTTONS["continue"] = tk.Button(ROOT, text="continue", fg="white", name="continueButton", background="#C88539")
+    BUTTONS["retry"] = tk.Button(ROOT, text="retry", command=rungame, fg="white", name="retryButton",background="#C88539")
+    BUTTONS["quit"] = tk.Button(ROOT, text="quit", fg="white", command=quit, name="quitButton", background="#C88539")
+    BUTTONS["go_main_menu"] = tk.Button(ROOT, text="Go to main menu", command=main, fg="white", name="go_main_menu",background="#C88539")
+    BUTTONS["upgrades_menu"] = tk.Button(ROOT, text="Upgrades", command=upgrades, fg="white", name="upgrades_menu",background="#C88539")
+    BUTTONS["damage_upgrade_level"] = tk.Button(ROOT, text=f"Damage upgrade level: {damage_upgrade_level} ", fg="white", name="damage_upgrade_level",background="#45AC4A")
+    BUTTONS["player_speed"] = tk.Button(ROOT, text=f"Player speed upgrade: {player_speed} ", fg="white", name="player_speed_upgrade", background="#45AC4A")
+    BUTTONS["bullet_quantity_upgrade_level"] = tk.Button(ROOT, text=f"Bullet quantity upgrade level: {bullet_quantity_upgrade_level} ", fg="white", name="bullet_quantity_upgrade_level",background="#45AC4A")
+    BUTTONS["speed_of_bullet_upgrade_level"] = tk.Button(ROOT, text=f"Speed of bullet upgrade: {speed_of_bullet_upgrade_level} ", fg="white", name="speed_of_bullet_upgrade_level",background="#45AC4A")
+    
+    BUTTONS["easyHardness"] = tk.Radiobutton(text="Easy", variable=choose_difficulty, value=0, bg="black", fg="white")
+    BUTTONS["midHardness"] = tk.Radiobutton(text="Medium", variable=choose_difficulty, value=7, bg="black", fg="white")
+    BUTTONS["highHardness"] = tk.Radiobutton(text="Hard", variable=choose_difficulty, value=14, bg="black", fg="white")
     main()
