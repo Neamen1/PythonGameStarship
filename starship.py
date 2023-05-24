@@ -838,14 +838,13 @@ class Bonus:
 
 
 def get_killed(bullet, items):
-    for i in range(bullet_quantity_upgrade_level):
-        bullet_pos = CANVAS.bbox(bullet.canvid-i)
-        for item in items:
-            item_pos = CANVAS.bbox(item.canvid)
-            if (item_pos[0] <= bullet_pos[0] <= item_pos[2] and item_pos[1] <= bullet_pos[1] <= item_pos[3]
-                    or item_pos[0] <= bullet_pos[2] <= item_pos[2] and item_pos[1] <= bullet_pos[3] - 30 <= item_pos[3]):
-                return item
-        return None
+    bullet_pos = CANVAS.bbox(bullet.canvid)
+    for item in items:
+        item_pos = CANVAS.bbox(item.canvid)
+        if (item_pos[0] <= bullet_pos[0] <= item_pos[2] and item_pos[1] <= bullet_pos[1] <= item_pos[3]
+                or item_pos[0] <= bullet_pos[2] <= item_pos[2] and item_pos[1] <= bullet_pos[3] - 30 <= item_pos[3]):
+            return item
+    return None
 
 
 def redraw_score(game):
