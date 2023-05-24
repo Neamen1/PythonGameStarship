@@ -703,14 +703,6 @@ def reset_game(game):
         ROOT.unbind_all("<KeyRelease-%s>" % char)
 
 
-
-def create_player(texture):
-    player_id = CANVAS.create_image(  # drawing image
-        (FIELD_WIDTH - PLAYER_WIDTH) / 2,
-        FIELD_HEIGHT - PLAYER_HEIGHT - FLOOR_SIZE,
-        image=texture)
-    return player_id
-
 class Player:
     
     def __init__(self, player_texture, bul_color, player_width = PLAYER_WIDTH, player_height=PLAYER_HEIGHT):
