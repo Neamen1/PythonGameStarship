@@ -136,6 +136,18 @@ def main():
     BUTTONS["highHardness"].place(x=(FIELD_WIDTH - 100) / 2, y=(FIELD_HEIGHT - 100) / 2 + 200, height=20)
     ROOT.mainloop()
 
+
+def write_to_file():        # write updated data to data file
+        global coins
+        game_money = open(MONEY_DIR_NAME, 'w')
+        game_money.write("money:"+str(coins)+"\n"+
+                        "damage_upgrade_level:" + str(damage_upgrade_level)+ "\n"+
+                        "player_speed:" + str(player_speed)+"\n"+
+                        "bullet_upgrade_level:" + str(bullet_quantity_upgrade_level)+"\n"+
+                        "speed_of_bullet_upgrade_level:" + str(speed_of_bullet_upgrade_level)+"\n")
+
+        game_money.close()
+
 # upgrades menu
 def upgrades():
     # cleaning all active objects
@@ -157,15 +169,7 @@ def upgrades():
     BUTTONS["speed_of_bullet_upgrade_level"].place(x=20, y=(FIELD_HEIGHT - 65) / 2.6 + (65+10)*3, width=200, height=65)
     
     CANVAS.create_text(FIELD_WIDTH / 2, 50, font=("ARIAL", 10), text=f'coins: {coins}', fill="white")
-    def write_to_file():        # write updated data to data file
-        game_money = open(MONEY_DIR_NAME, 'w')
-        game_money.write("money:"+str(coins)+"\n"+
-                        "damage_upgrade_level:" + str(damage_upgrade_level)+ "\n"+
-                        "player_speed:" + str(player_speed)+"\n"+
-                        "bullet_upgrade_level:" + str(bullet_quantity_upgrade_level)+"\n"+
-                        "speed_of_bullet_upgrade_level:" + str(speed_of_bullet_upgrade_level)+"\n")
-
-        game_money.close()
+    
     
     def redraw_coins_text():
         coins_text = CANVAS.find_overlapping(FIELD_WIDTH / 2 - 10, 50 - 10, FIELD_WIDTH / 2 + 10, 50 + 10)
@@ -182,7 +186,6 @@ def upgrades():
         damage_upgrade_needed_coins = 200 * (damage_upgrade_level)
         if damage_upgrade_level >= 20:
             BUTTONS["damage_upgrade_level"].configure(command=None, text="Max damage upgrade!")
-            write_to_file()
         elif coins>=damage_upgrade_needed_coins:              # if enough money - buys upgrade
             pos_x = FIELD_WIDTH / 2
             pos_y = 20
@@ -407,8 +410,10 @@ def runlevel(game):         # level parameters
             if not is_won and not game["is_over"]:
                 CANVAS.after(TICK, self.nextstep)  # invoking loop again every tick, between invoking buttons input can be read
             elif is_won:
+                write_to_file()
                 do_game_win(game)
             else:
+                write_to_file()
                 do_game_over(game)
 
         def _set_bindings(self):
@@ -486,14 +491,7 @@ def update_game(game):
             else:
                 # for dead enemies:
                 coins+=1*(killed_enemy.max_health //2)
-                game_money = open(MONEY_DIR_NAME, 'w')          # rewrite data to file
-                game_money.write("money:"+str(coins)+"\n"+
-                            "damage_upgrade_level:" + str(damage_upgrade_level)+ "\n"+
-                            "player_speed:" + str(player_speed)+"\n"+
-                            "bullet_upgrade_level:" + str(bullet_quantity_upgrade_level)+"\n"+
-                            "speed_of_bullet_upgrade_level:" + str(speed_of_bullet_upgrade_level)+"\n")
-
-                game_money.close()
+                
 
                 pos_1 = FIELD_WIDTH / 1.5
                 pos_2 = 30
