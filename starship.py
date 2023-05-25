@@ -352,10 +352,8 @@ def runlevel(game):         # level parameters
         CANVAS.after(int((1.5-(game["hardness"]*0.03))*1000) , lambda: CANVAS.delete(warning_text))     # after some time delete warning text
     
     game["num_of_enemies"] = DEFAULT_ENEMIES_NUMBER + game["hardness"]
-    game["bonuses"].append(Bonus())
-    chanse = random.randint(1, 100)
-    if chanse >= 0 and chanse <= 70:
-        game["bonuses"].append(Bonus(color="pink", x2=10, y2=10))
+    
+    
 
     global coins                # (re)drawing money text
     pos_1 = FIELD_WIDTH / 1.5 
@@ -481,15 +479,20 @@ def update_game(game):
                     update_game_score(game, enemy.max_health)
                     enemy.clear()
                 game["enemies"].clear()
-                game["num_of_enemies"] = 0
 
         
         if killed_enemy:
+            chance = random.randint(1, 100)
+            
+            if chance <10:  # for every enemy hit with some chance spawn additional bullets
+                game["bonuses"].append(Bonus())
             killed_enemy.health -= damage_upgrade_level     # Decreasing enemy HP on hit
             if killed_enemy.health > 0:
                 killed_enemy.redraw_health()  # redraw health for living enemies
             else:
                 # for dead enemies:
+                if chance <5:   # for every enemy kill with some chance spawn enemy wipe bonus
+                    game["bonuses"].append(Bonus(color="pink"))
                 coins+=1*(killed_enemy.max_health //2)
                 
 
@@ -713,6 +716,8 @@ class Player:
     def move(self, step):
         step*=player_speed
         player_pos = CANVAS.bbox(self.id)
+        if not player_pos:
+            return
         if not (player_pos[0] + step < FIELD_WIDTH * 0.1 or player_pos[2]+step > FIELD_WIDTH * 0.9):
             CANVAS.move(self.id, step, 0)
 
@@ -720,6 +725,8 @@ class Player:
         ammo = game["ammo"].get()
         if ammo > 0:
             player_pos = CANVAS.bbox(self.id)
+            if not player_pos:
+                return
             player_x = (player_pos[0]+player_pos[2])//2
             player_y = player_pos[1]
             bullet_shift = 15
