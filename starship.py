@@ -4,7 +4,7 @@ import random
 import time
 import tkinter as tk
 from PIL import Image, ImageTk  # Pillow library
-from global_constans import *
+from global_constans import TICK,FIELD_WIDTH, FIELD_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, FLOOR_SIZE,DEFAULT_ENEMIES_NUMBER, PROJECT_DIR, IMAGES_DIR,SCORES_DIR_NAME,DATA_DIR_NAME,ENEMY_IMAGE_LIGHT,ENEMY_IMAGE_MEDIUM, ENEMY_IMAGE_HEAVY, ENEMY_IMAGE_BOSS,PLAYER1_IMAGE,PLAYER2_IMAGE      
 import global_vars as glv
 # import classes
 from Dead_Piece_class import Dead_Piece
@@ -264,7 +264,6 @@ def runlevel(game):         # level parameters
     
     def do_game_over_on_button_press():
         game["is_over"]=True
-        do_game_over(game)
         
     glv.CANVAS.bind_all('<KeyPress-r>', lambda e: do_game_over_on_button_press())
 
@@ -287,7 +286,6 @@ def runlevel(game):         # level parameters
     glv.CANVAS.create_text(pos_1, pos_2, text=f'coins: {glv.coins}', fill="white")
 
     redraw_score(game)
-
     class Playfield:
         def __init__(self):
             self.pressed = {}
@@ -304,12 +302,11 @@ def runlevel(game):         # level parameters
             self.player2.move(-40)
             game["players"].append(self.player2)
             game["is_over"] = False
-            self.nextstep()
 
         def nextstep(self):  # game main loop
             update_game(game)
 
-            if self.tickCounter%6==5:
+            if self.tickCounter%5==4:
                 
                 if self.pressed["a"]: self.player2.move(-10)
                 elif self.pressed["d"]: self.player2.move(10)
@@ -317,7 +314,7 @@ def runlevel(game):         # level parameters
                 if self.pressed["j"]: self.player1.move(-10)
                 elif self.pressed["l"]: self.player1.move(10)
 
-                if self.tickCounter% 10 == 9:
+                if self.tickCounter > 9:
                     if self.pressed["w"]: self.player2.shoot(game)
                     if self.pressed["i"]: self.player1.shoot(game)
                     self.tickCounter=-1
@@ -503,6 +500,7 @@ def explode_from_all_sides(game, bonus):  # One more function for drawing explos
 
 
 def do_game_over(game):
+    game["is_over"] = True
     reset_game(game)  # removing the keypress handlers
     if not glv.top10_scores:
         top_scores = open(SCORES_DIR_NAME,"w")
@@ -518,8 +516,7 @@ def do_game_over(game):
         for i in glv.top10_scores:
             top_scores.write(str(i)+"\n")
         top_scores.close()
-
-
+    BUTTONS["go_main_menu"].configure(command=main)
     glv.CANVAS.create_text(FIELD_WIDTH / 2, FIELD_HEIGHT / 2 - 30, font=("BRUSH SCRIPT MT", 50, "bold"),
                        text="Game Over...", fill="#D20606")
     glv.CANVAS.create_text(FIELD_WIDTH / 2, FIELD_HEIGHT / 2 + 30, font=("BRUSH SCRIPT MT", 30, "bold"),
