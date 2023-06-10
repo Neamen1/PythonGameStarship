@@ -10,7 +10,7 @@ import global_vars as glv
 from Dead_Piece_class import Dead_Piece
 from Player_class import Player
 from Enemies_health_bar_classes import Enemies
-from Classes_bonuses import Bullet_bonus, Enemy_wipe_bonus
+from Classes_bonuses import Bonus_factory, Bullet_bonus, Enemy_wipe_bonus
 
 choose_difficulty = tk.IntVar()     # in-game difficulty 
 BUTTONS = {}        # all buttons are stored in dictionary
@@ -306,13 +306,13 @@ def runlevel(game):         # level parameters
         def nextstep(self):  # game main loop
             update_game(game)
 
-            if self.tickCounter%5==4:
+            if self.tickCounter%2==0:
                 
-                if self.pressed["a"]: self.player2.move(-10)
-                elif self.pressed["d"]: self.player2.move(10)
+                if self.pressed["a"]: self.player2.move(-4)
+                elif self.pressed["d"]: self.player2.move(4)
                 
-                if self.pressed["j"]: self.player1.move(-10)
-                elif self.pressed["l"]: self.player1.move(10)
+                if self.pressed["j"]: self.player1.move(-4)
+                elif self.pressed["l"]: self.player1.move(4)
 
                 if self.tickCounter > 9:
                     if self.pressed["w"]: self.player2.shoot(game)
@@ -399,14 +399,14 @@ def update_game(game):
             chance = random.randint(1, 100)
             
             if chance <10:  # for every enemy hit with some chance spawn bullets bonus
-                game["bonuses"].append(Bullet_bonus())
+                game["bonuses"].append(Bonus_factory.get("Bullet_bonus"))
             killed_enemy.hb.health -= glv.damage_upgrade_level     # Decreasing enemy HP on hit
             if killed_enemy.hb.health > 0:
                 killed_enemy.hb.redraw_health(killed_enemy.canvid)  # redraw health for living enemies
             else:
                 # for dead enemies:
-                if chance <5:   # for every enemy kill with some chance spawn enemy wipe bonus
-                    game["bonuses"].append(Enemy_wipe_bonus())
+                if chance <50:   # for every enemy kill with some chance spawn enemy wipe bonus
+                    game["bonuses"].append(Bonus_factory.get("Enemy_wipe_bonus"))
                 glv.coins+=1*(killed_enemy.max_health //2)
                 
 
