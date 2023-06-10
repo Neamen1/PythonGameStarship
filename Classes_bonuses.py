@@ -4,7 +4,7 @@ from global_constans import FIELD_WIDTH, FIELD_HEIGHT
 
 
 class Bonus:
-    def __init__(self, shiftx=0, shifty=0.5, x2=0, y2=0):
+    def __init__(self, shiftx=0, shifty=0.5):
         self.shiftx = shiftx
         self.shifty = shifty
         
@@ -27,3 +27,13 @@ class Enemy_wipe_bonus(Bonus):
         x = random.randrange(int(FIELD_WIDTH * 0.2), int(FIELD_WIDTH * 0.8), 5)
         y = random.randrange(int(FIELD_HEIGHT * 0.1), int(FIELD_HEIGHT * 0.4), 5)
         self.canvid = glv.CANVAS.create_rectangle(x, y, x+30, y+30, fill="pink", tag="Bonus")
+    def move(self):
+        glv.CANVAS.move(self.canvid, self.shiftx*5, self.shifty*5)
+
+class Bonus_factory:
+    @staticmethod
+    def get(class_name: str) -> object:
+        if class_name == "Bullet_bonus":
+            return Bullet_bonus()
+        if class_name == "Enemy_wipe_bonus":
+            return Enemy_wipe_bonus()
