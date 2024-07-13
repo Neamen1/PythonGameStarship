@@ -31,9 +31,9 @@ To install and run the game locally, follow these steps:
 
 2. Ensure you have Python installed.
 
-3. Install the required dependencies:
+3. Install the required dependencies (also uses tkinter and some other default libraries):
     ```sh
-    pip install -r requirements.txt
+    pip install pillow
     ```
 
 4. Run the game:
